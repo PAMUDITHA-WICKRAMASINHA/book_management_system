@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DataHandler from "../handlers/DataHandler";
 
 const Home = () => {
+  const navigate = useNavigate();
   const [bookData, setBookData] = useState({
     title: "",
     author: "",
@@ -11,6 +14,11 @@ const Home = () => {
   const [searchTitle, setSearchTitle] = useState("");
   const [searchAuthor, setSearchAuthor] = useState("");
   const [searchGenre, setSearchGenre] = useState("");
+
+  const handleLogout = () => {
+    DataHandler.clearSession();
+    navigate("/login");
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +58,15 @@ const Home = () => {
   return (
     <div className="container mt-5">
       <div className="card">
-        <div className="card-header">Input Area</div>
+        <div className="card-header d-flex justify-content-between align-items-center">
+          Input Area
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
         <div className="card-body">
           <div className="mb-3">
             <label htmlFor="title" className="form-label">
