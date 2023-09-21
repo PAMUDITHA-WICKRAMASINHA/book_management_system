@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataHandler from "../handlers/DataHandler";
+import APIService from "../services/APIService";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -9,7 +10,9 @@ const Home = () => {
     author: "",
     publication_year: "",
     genre: "",
+    book_id: "",
   });
+  const [update, setUpdate] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [searchTitle, setSearchTitle] = useState("");
   const [searchAuthor, setSearchAuthor] = useState("");
@@ -20,40 +23,91 @@ const Home = () => {
     navigate("/login");
   };
 
+  useEffect(() => {
+    handleGetToTable();
+  }, []);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setBookData({ ...bookData, [name]: value });
   };
 
   const handleAddToTable = () => {
-    setTableData([...tableData, bookData]);
-    setBookData({
-      title: "",
-      author: "",
-      publication_year: "",
-      genre: "",
-    });
+    {
+      update
+        ? APIService({
+            url: `${process.env.REACT_APP_API}/book/update`,
+            method: "PUT",
+            data: bookData,
+          })
+            .then((res) => {
+              setUpdate(false);
+              handleGetToTable();
+              setBookData({
+                title: "",
+                author: "",
+                publication_year: "",
+                genre: "",
+              });
+            })
+            .catch((err) => {})
+            .finally(() => {})
+        : APIService({
+            url: `${process.env.REACT_APP_API}/book/create`,
+            method: "POST",
+            data: bookData,
+          })
+            .then((res) => {
+              handleGetToTable();
+              setBookData({
+                title: "",
+                author: "",
+                publication_year: "",
+                genre: "",
+              });
+            })
+            .catch((err) => {})
+            .finally(() => {});
+    }
+  };
+
+  const handleGetToTable = () => {
+    APIService({
+      url: `${process.env.REACT_APP_API}/book/get?title=${searchTitle}&author=${searchAuthor}&genre=${searchGenre}`,
+      method: "GET",
+    })
+      .then((res) => {
+        setTableData(res.data);
+      })
+      .catch((err) => {})
+      .finally(() => {});
   };
 
   const handleDelete = (index) => {
-    const updatedTableData = [...tableData];
-    updatedTableData.splice(index, 1);
-    setTableData(updatedTableData);
+    APIService({
+      url: `${process.env.REACT_APP_API}/book/delete`,
+      method: "POST",
+      data: {
+        book_id: tableData[index].book_id,
+      },
+    })
+      .then((res) => {
+        handleGetToTable();
+        setTableData(res.data);
+      })
+      .catch((err) => {})
+      .finally(() => {});
   };
 
-  const filteredTableData = tableData.filter((item) => {
-    const titleMatches = item.title
-      .toLowerCase()
-      .includes(searchTitle.toLowerCase());
-    const authorMatches = item.author
-      .toLowerCase()
-      .includes(searchAuthor.toLowerCase());
-    const genreMatches = item.genre
-      .toLowerCase()
-      .includes(searchGenre.toLowerCase());
-
-    return titleMatches && authorMatches && genreMatches;
-  });
+  const handleaddUpdate = (index, item) => {
+    setUpdate(true);
+    setBookData({
+      title: item.title,
+      author: item.author,
+      publication_year: item.publication_year,
+      genre: item.genre,
+      book_id: item.book_id,
+    });
+  };
 
   return (
     <div className="container mt-5">
@@ -124,7 +178,7 @@ const Home = () => {
             type="button"
             className="btn btn-primary"
             onClick={handleAddToTable}>
-            Add to Table
+            {update ? "Update Table" : "Add to Table"}
           </button>
         </div>
       </div>
@@ -158,7 +212,7 @@ const Home = () => {
               onChange={(e) => setSearchGenre(e.target.value)}
             />
           </div>
-          <button className="btn btn-primary" onClick={() => {}}>
+          <button className="btn btn-primary" onClick={handleGetToTable}>
             Search
           </button>
         </div>
@@ -175,25 +229,30 @@ const Home = () => {
             </tr>
           </thead>
           <tbody>
-            {tableData.map((item, index) => (
-              <tr key={index}>
-                <td>{item.title}</td>
-                <td>{item.author}</td>
-                <td>{item.publication_year}</td>
-                <td>{item.genre}</td>
-                <td>
-                  <button type="button" className="btn btn-secondary">
-                    Update
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger ms-2"
-                    onClick={() => handleDelete(index)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {tableData &&
+              tableData.length > 0 &&
+              tableData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.title}</td>
+                  <td>{item.author}</td>
+                  <td>{item.publication_year}</td>
+                  <td>{item.genre}</td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => handleaddUpdate(index, item)}
+                      className="btn btn-secondary">
+                      Update
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger ms-2"
+                      onClick={() => handleDelete(index)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
