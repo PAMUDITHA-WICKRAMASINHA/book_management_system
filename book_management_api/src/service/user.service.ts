@@ -8,8 +8,7 @@ export const userRegistration = async ({user_name, email, password}) => {
 
     try{
         const userData = await userModel.findOne({
-            email,
-            is_delete: false,
+            email
         });
         if(userData){
             data = {error: true, message: "user alredy exit"}
