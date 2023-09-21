@@ -12,7 +12,7 @@ const PATH = {
 	DELETE_USER: '/delete',
 };
 
-routes.route(PATH.REGISTER).post(userController.userRegistration);
+routes.route(PATH.REGISTER).post(validate(VALIDATOR.CREATE_USER), userController.userRegistration);
 routes.route(PATH.LOGIN).post(userController.userLogin);
 routes.route(PATH.DELETE_USER).post(validate(VALIDATOR.DELETE_USER), UserAuthenticationMiddleware, userController.userDelete);
 
