@@ -5,6 +5,11 @@ import APIService from "../services/APIService";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "danger",
+    status: false,
+  });
   const [bookData, setBookData] = useState({
     title: "",
     author: "",
@@ -48,9 +53,28 @@ const Home = () => {
                 publication_year: "",
                 genre: "",
               });
+              setAlert({
+                message: res.message,
+                type: "success",
+                status: true,
+              });
             })
-            .catch((err) => {})
-            .finally(() => {})
+            .catch((err) => {
+              setAlert({
+                message: err.message,
+                type: "danger",
+                status: true,
+              });
+            })
+            .finally(() => {
+              setTimeout(() => {
+                setAlert({
+                  message: "",
+                  type: "danger",
+                  status: false,
+                });
+              }, 1000);
+            })
         : APIService({
             url: `${process.env.REACT_APP_API}/book/create`,
             method: "POST",
@@ -64,9 +88,28 @@ const Home = () => {
                 publication_year: "",
                 genre: "",
               });
+              setAlert({
+                message: res.message,
+                type: "success",
+                status: true,
+              });
             })
-            .catch((err) => {})
-            .finally(() => {});
+            .catch((err) => {
+              setAlert({
+                message: err.message,
+                type: "danger",
+                status: true,
+              });
+            })
+            .finally(() => {
+              setTimeout(() => {
+                setAlert({
+                  message: "",
+                  type: "danger",
+                  status: false,
+                });
+              }, 1000);
+            });
     }
   };
 
@@ -78,8 +121,22 @@ const Home = () => {
       .then((res) => {
         setTableData(res.data);
       })
-      .catch((err) => {})
-      .finally(() => {});
+      .catch((err) => {
+        setAlert({
+          message: err.message,
+          type: "danger",
+          status: true,
+        });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setAlert({
+            message: "",
+            type: "danger",
+            status: false,
+          });
+        }, 1000);
+      });
   };
 
   const handleDelete = (index) => {
@@ -93,9 +150,28 @@ const Home = () => {
       .then((res) => {
         handleGetToTable();
         setTableData(res.data);
+        setAlert({
+          message: res.message,
+          type: "success",
+          status: true,
+        });
       })
-      .catch((err) => {})
-      .finally(() => {});
+      .catch((err) => {
+        setAlert({
+          message: err.message,
+          type: "danger",
+          status: true,
+        });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setAlert({
+            message: "",
+            type: "danger",
+            status: false,
+          });
+        }, 1000);
+      });
   };
 
   const handleaddUpdate = (index, item) => {
@@ -111,6 +187,11 @@ const Home = () => {
 
   return (
     <div className="container mt-5">
+      {alert.status && (
+        <div class={`alert alert-${alert.type}`} role="alert">
+          {alert.message}
+        </div>
+      )}
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
           Input Area

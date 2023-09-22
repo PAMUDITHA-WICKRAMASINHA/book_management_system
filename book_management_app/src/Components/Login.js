@@ -11,6 +11,11 @@ const defaultValues = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "danger",
+    status: false,
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { handleSubmit } = useForm({
@@ -37,17 +42,33 @@ const Login = () => {
             DataHandler.setToSession("accessToken", res.data.accessToken);
             navigate("/");
           } else {
+            setAlert({
+              message: res.error.message,
+              type: "danger",
+              status: true,
+            });
           }
         })
       )
-      .catch((errors) => {
-        {
-        }
+      .catch((errors) => {})
+      .finally(() => {
+        setTimeout(() => {
+          setAlert({
+            message: "",
+            type: "danger",
+            status: false,
+          });
+        }, 1000);
       });
   }
 
   return (
     <div className="container mt-5">
+      {alert.status && (
+        <div class={`alert alert-${alert.type}`} role="alert">
+          {alert.message}
+        </div>
+      )}
       <div className="card">
         <div className="card-header">Login</div>
         <div className="card-body">

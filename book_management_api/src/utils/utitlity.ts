@@ -20,6 +20,14 @@ export const badRequestError = (res: Response, errors: string) => {
 	return sendJSONResponse(res, code, response);
 };
 
+export const notFountRequestError = (res: Response, errors: string) => {
+	let code: number, response: errorResponseJson;
+	const data = { message: errors };
+	code = HTTPStatus.NOT_FOUND;
+	response = createErrorResponseJSON(data);
+	return sendJSONResponse(res, code, response);
+};
+
 export const sendJSONResponse = (
 	res: Response,
 	statusCode: number,
