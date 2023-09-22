@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import APIService from "../services/APIService";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 const defaultValues = {
   user_name: "",
@@ -8,7 +9,12 @@ const defaultValues = {
   password: "",
 };
 const Register = () => {
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "danger",
+    status: false,
+  });
   const { handleSubmit } = useForm({
     mode: "onChange",
     defaultValues,
@@ -36,13 +42,33 @@ const Register = () => {
           email: "",
           password: "",
         });
+        navigate("/");
       })
-      .catch((err) => {})
-      .finally(() => {});
+      .catch((err) => {
+        setAlert({
+          message: err.message,
+          type: "danger",
+          status: true,
+        });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setAlert({
+            message: "",
+            type: "danger",
+            status: false,
+          });
+        }, 1000);
+      });
   }
 
   return (
     <div className="container mt-5">
+      {alert.status && (
+        <div class={`alert alert-${alert.type}`} role="alert">
+          {alert.message}
+        </div>
+      )}
       <div className="card">
         <div className="card-header">Register</div>
         <div className="card-body">
